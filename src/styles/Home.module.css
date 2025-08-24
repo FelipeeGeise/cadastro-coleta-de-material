@@ -553,3 +553,149 @@
   transform: translateY(-2px);
 }
 
+
+
+@media (max-width: 768px) {
+  
+  .corpoDoProjeto {
+    width: 100%;
+  }
+  
+  .cabecalho {
+    flex-direction: column;
+    height: 200px;
+    width: 100%;
+    padding: 20px 0px;
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .section {
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+  }
+
+  .divSection {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .mainArticle {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+ .main {
+    width: 99%;
+    max-width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+
+  .fakeSelect {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .article {
+    width: 90%;
+  }
+
+  .card {
+    width: 90%;
+    height: auto;
+    padding: 20px;
+  }
+
+  .card p {
+    font-size: 28px;
+  }
+
+  .botaoVoltar {
+    font-size: 18px;
+    padding: 8px 16px;
+  }
+
+  .itemCadastro {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .imagemCadastro img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .listaContainer {
+    padding: 0 10px;
+  }
+}
+
+/*--------@media 375px-------------------*/
+
+
+@media (max-width: 375px) {
+
+  .cabecalho {
+    width: 100%;
+    height: auto;
+    font-size: 18px;
+    padding: 10px 0;
+    
+  }
+
+  
+
+  .card p {
+    font-size: 22px;
+  }
+
+  .botaoVoltar {
+    font-size: 16px;
+    padding: 6px 12px;
+  }
+
+  .main {
+    max-width: 99%;
+    padding: 10px;
+  }
+
+  .imagemCadastro img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .divSection {
+    max-width: 100%;
+  }
+
+
+  .card,
+  .main {
+    display: flex;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .article {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin:0 auto;
+    
+  }
+
+  .listaContainer {
+    padding: 0 5px;
+  }
+
+  .fakeSelect {
+    font-size: 16px;
+    padding: 8px;
+  }
+}
+
