@@ -41,19 +41,19 @@ export default function Lista() {
             )}
 
             {/* Botão de excluir */}
-            <button
-              className={styles.botaoExcluir}
-              onClick={() => {
-                console.log("Tentando excluir cadastro com ID:", cadastro.id);
-                if (cadastro.id) {
-                  removeCadastro(cadastro.id);
-                } else {
-                  console.warn("Cadastro sem ID. Não é possível excluir.");
-                }
-              }}
-            >
-              Excluir
-            </button>
+           <button
+  className={styles.botaoExcluir}
+  onClick={() => {
+    console.log("Tentando excluir cadastro com ID:", cadastro.id);
+    if (cadastro.id) {
+      removeCadastro(cadastro.id);
+    } else {
+      console.warn("Cadastro sem ID. Não é possível excluir.");
+    }
+  }}
+>
+  Excluir
+</button>
 
 
           </div>

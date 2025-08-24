@@ -1,7 +1,7 @@
-import { createContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useState, ReactNode, useEffect, useCallback } from "react";
 
 export interface Cadastro {
-  id?: number; // id vindo do banco
+  id?: number;
   emitente: string;
   razao: string;
   foto: string;
@@ -24,49 +24,46 @@ export const CadastroContext = createContext<CadastroContextType>({
 
 export function CadastroProvider({ children }: { children: ReactNode }) {
   const [cadastros, setCadastros] = useState<Cadastro[]>([]);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-  const API_URL = "http://localhost:4000"; // endereço do backend
-
-  // Buscar cadastros do backend
-  const fetchCadastros = async () => {
+  // Função memorizada para evitar re-renderizações desnecessárias
+  const fetchCadastros = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/cadastros`);
       const data = await res.json();
+      console.log("Cadastros recebidos:", data);
       setCadastros(data);
     } catch (err) {
       console.error("Erro ao buscar cadastros:", err);
     }
-  };
+  }, [API_URL]);
 
-  // Adicionar cadastro via backend
   const addCadastro = async (cadastro: Cadastro) => {
     try {
-      const res = await fetch(`${API_URL}/cadastros`, {
+      await fetch(`${API_URL}/cadastros`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cadastro),
       });
-      const data = await res.json();
-      setCadastros((prev) => [...prev, { ...cadastro, id: data.id }]);
+      await fetchCadastros();
     } catch (err) {
       console.error("Erro ao adicionar cadastro:", err);
     }
   };
 
-  // Remover cadastro via backend
   const removeCadastro = async (id: number) => {
     try {
       await fetch(`${API_URL}/cadastros/${id}`, { method: "DELETE" });
-      setCadastros((prev) => prev.filter((c) => c.id !== id));
+      await fetchCadastros();
     } catch (err) {
       console.error("Erro ao remover cadastro:", err);
     }
   };
 
-  // Carregar cadastros quando o contexto iniciar
+  // Executa apenas quando fetchCadastros mudar (graças ao useCallback)
   useEffect(() => {
-    fetchCadastros();
-  }, []);
+    void fetchCadastros();
+  }, [fetchCadastros]);
 
   return (
     <CadastroContext.Provider

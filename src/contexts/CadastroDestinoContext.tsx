@@ -1,7 +1,13 @@
-import { createContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from "react";
 
 export interface CadastroDestino {
-  id?: number; // id agora vem do banco
+  id?: number;
   empresa: string;
   foto: string;
   obs: string;
@@ -24,11 +30,9 @@ export const CadastroDestinoContext = createContext<CadastroDestinoContextType>(
 
 export function CadastroDestinoProvider({ children }: { children: ReactNode }) {
   const [cadastrosDestino, setCadastrosDestino] = useState<CadastroDestino[]>([]);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
-  const API_URL = "http://localhost:4000"; // endereço do backend
-
-  // Buscar cadastros do backend
-  const fetchCadastrosDestino = async () => {
+  const fetchCadastrosDestino = useCallback(async () => {
     try {
       const res = await fetch(`${API_URL}/cadastrosDestino`);
       const data = await res.json();
@@ -36,9 +40,8 @@ export function CadastroDestinoProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error("Erro ao buscar cadastrosDestino:", err);
     }
-  };
+  }, [API_URL]);
 
-  // Adicionar cadastro via backend
   const addCadastroDestino = async (cadastro: CadastroDestino) => {
     try {
       const res = await fetch(`${API_URL}/cadastrosDestino`, {
@@ -53,7 +56,6 @@ export function CadastroDestinoProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Remover cadastro via backend
   const removeCadastroDestino = async (id: number) => {
     try {
       await fetch(`${API_URL}/cadastrosDestino/${id}`, { method: "DELETE" });
@@ -63,14 +65,18 @@ export function CadastroDestinoProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Carregar cadastros quando o contexto iniciar
   useEffect(() => {
     fetchCadastrosDestino();
-  }, []);
+  }, [fetchCadastrosDestino]);
 
   return (
     <CadastroDestinoContext.Provider
-      value={{ cadastrosDestino, addCadastroDestino, removeCadastroDestino, fetchCadastrosDestino }}
+      value={{
+        cadastrosDestino,
+        addCadastroDestino,
+        removeCadastroDestino,
+        fetchCadastrosDestino,
+      }}
     >
       {children}
     </CadastroDestinoContext.Provider>
