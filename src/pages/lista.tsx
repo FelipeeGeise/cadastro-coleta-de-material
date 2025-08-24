@@ -1,31 +1,67 @@
-// src/pages/lista.tsx
+// lista.tsx
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import styles from "@/styles/Home.module.css";
-import { useContext } from "react";
-import { CadastroContext, Cadastro } from "@/contexts/CadastroContext";
 import Image from "next/image";
 import Link from "next/link";
 
+type Coleta = {
+  id: string;
+  emitente: string;
+  razao: string;
+  foto?: string;
+  data?: string;
+};
+
 export default function Lista() {
-  const { cadastros, removeCadastro } = useContext(CadastroContext); // pega cadastros e função de remover
+  const [coletas, setColetas] = useState<Coleta[]>([]);
+  const [filtro, setFiltro] = useState("");
+
+  useEffect(() => {
+    const buscarColetas = async () => {
+      const { data, error } = await supabase
+        .from("coletas")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Erro ao buscar coletas:", error);
+      } else {
+        setColetas(data || []);
+      }
+    };
+
+    buscarColetas();
+  }, []);
+
+  const coletasFiltradas = coletas.filter((c) =>
+    c.emitente.toLowerCase().includes(filtro.toLowerCase()) ||
+    c.razao.toLowerCase().includes(filtro.toLowerCase())
+  );
 
   return (
     <div className={styles.listaPage}>
-      <h1>Listagem de Cadastros</h1>
+      <h1>Listagem de Coletas</h1>
 
-      {/* Se não houver cadastros */}
-      {cadastros.length === 0 && <p>Nenhum cadastro salvo.</p>}
+      <input
+        type="text"
+        placeholder="Buscar por emitente ou razão social"
+        value={filtro}
+        onChange={(e) => setFiltro(e.target.value)}
+        className={styles.inputFiltro}
+      />
+
+      {coletasFiltradas.length === 0 && <p>Nenhum cadastro encontrado.</p>}
 
       <div className={styles.listaContainer}>
-        {cadastros.map((cadastro: Cadastro, index: number) => (
+        {coletasFiltradas.map((cadastro, index) => (
           <div key={index} className={styles.itemCadastro}>
-            {/* Dados do cadastro */}
             <div className={styles.infoCadastro}>
               <p><strong>Emitente:</strong> {cadastro.emitente}</p>
               <p><strong>Razão Social:</strong> {cadastro.razao}</p>
-              <p><strong>Data:</strong> {new Date(cadastro.data).toLocaleString()}</p>
+              <p><strong>Data:</strong> {new Date(cadastro.data || "").toLocaleString()}</p>
             </div>
 
-            {/* Imagem do cadastro */}
             {cadastro.foto && (
               <div className={styles.imagemCadastro}>
                 <a href={cadastro.foto} target="_blank" rel="noopener noreferrer">
@@ -39,28 +75,10 @@ export default function Lista() {
                 </a>
               </div>
             )}
-
-            {/* Botão de excluir */}
-           <button
-  className={styles.botaoExcluir}
-  onClick={() => {
-    console.log("Tentando excluir cadastro com ID:", cadastro.id);
-    if (cadastro.id) {
-      removeCadastro(cadastro.id);
-    } else {
-      console.warn("Cadastro sem ID. Não é possível excluir.");
-    }
-  }}
->
-  Excluir
-</button>
-
-
           </div>
         ))}
       </div>
 
-      {/* Botão Voltar ao Início */}
       <div className={styles.botaoVoltarContainer}>
         <Link href="/" className={styles.botaoVoltar}>
           Voltar ao Início

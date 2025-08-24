@@ -1,3 +1,4 @@
+import { supabase } from '@/lib/supabaseClient'
 import Head from "next/head";
 import Image from "next/image";
 import styles from "@/styles/Home.module.css";
@@ -6,11 +7,39 @@ import styles from "@/styles/Home.module.css";
 import Section from "@/components/section/section";
 import Main from "@/components/main/main";
 import Article from "@/components/article/article";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type Coleta = {
+  id?: string;
+  emitente: string;
+  razao: string;
+  foto?: string;
+  data?: string;
+};
+
 
 export default function Home() {
   // State para compartilhar a foto do Article com o Main
   const [fotoDoArticle, setFotoDoArticle] = useState<string | null>(null);
+ const [coletas, setColetas] = useState<Coleta[]>([]);
+
+  // Buscar dados do Supabase ao carregar a página
+  useEffect(() => {
+    const carregarColetas = async () => {
+      const { data, error } = await supabase
+        .from('coletas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Erro ao buscar coletas:", error);
+      } else {
+        setColetas(data);
+      }
+    };
+
+    carregarColetas();
+  }, []);
 
   return (
     <>
@@ -31,7 +60,7 @@ export default function Home() {
         <Section />
 
         <div className={styles.mainArticle}>
-          <Main fotoDoArticle={fotoDoArticle} />
+          <Main fotoDoArticle={fotoDoArticle} coletas={coletas} />
           <Article setFotoDoArticle={setFotoDoArticle} />
         </div>
 

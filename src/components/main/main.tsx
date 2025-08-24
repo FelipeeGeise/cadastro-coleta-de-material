@@ -1,35 +1,65 @@
 // Main.tsx
 import styles from "@/styles/Home.module.css";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
-import { CadastroContext } from "@/contexts/CadastroContext";
+import { supabase } from "@/lib/supabaseClient"; // ✅ Importa o Supabase
 import Link from "next/link";
 
-export default function Main({ fotoDoArticle }: { fotoDoArticle: string | null }) {
-  const { addCadastro } = useContext(CadastroContext);
+// Tipagem dos dados de coleta
+type Coleta = {
+  id?: string;
+  emitente?: string;
+  razao?: string;
+  foto?: string;
+  data?: string;
+};
 
+type MainProps = {
+  fotoDoArticle: string | null;
+  coletas: Coleta[];
+};
+
+export default function Main({ fotoDoArticle, coletas }: MainProps) {
   const [emitente, setEmitente] = useState("");
   const [razao, setRazao] = useState("");
   const [showEmpresas, setShowEmpresas] = useState(false);
   const [showRazoes, setShowRazoes] = useState(false);
 
-  const empresas = ["KG-MLAN", "MUNDO DA IMPERMEABILIZAÇÃO", "ESPERANÇA NORDESTE", "MAFEMA", "BORGES","NORDESTE FIXAÇÕES","ARCELOR MITTAL","SN-TUDO HIDRÁULICO",];
-  const razoes = ["PRATERIA","ROTAME","JÃO CARLOS","RODHES","DLT","TDS","JOÃO GUILHERME","FT ENGENHARIA",];
+  const empresas = [
+    "KG-MLAN", "MUNDO DA IMPERMEABILIZAÇÃO", "ESPERANÇA NORDESTE", "MAFEMA",
+    "BORGES", "NORDESTE FIXAÇÕES", "ARCELOR MITTAL", "SN-TUDO HIDRÁULICO"
+  ];
+  const razoes = [
+    "PRATERIA", "ROTAME", "JÃO CARLOS", "RODHES", "DLT", "TDS",
+    "JOÃO GUILHERME", "FT ENGENHARIA"
+  ];
 
-  const router = useRouter(); // ✅ dentro da função
+  const router = useRouter();
 
-  const handleSalvar = () => {
-    if (!emitente || !razao) return alert("Preencha todos os campos!");
+  // ✅ Salva no Supabase
+  const handleSalvar = async () => {
+    if (!emitente || !razao) {
+      alert("Preencha todos os campos!");
+      return;
+    }
 
-    addCadastro({
-      emitente,
-      razao,
-      foto: fotoDoArticle || "",
-      data: new Date().toISOString()
-    });
+    const { error } = await supabase
+      .from("coletas")
+      .insert([
+        {
+          emitente,
+          razao,
+          foto: fotoDoArticle || "",
+          data: new Date().toISOString(),
+        },
+      ]);
 
-    // Redireciona para a página de sucesso
-    router.push("/Sucesso");
+    if (error) {
+      console.error("Erro ao salvar no Supabase:", error);
+      alert("Erro ao salvar. Tente novamente.");
+    } else {
+      router.push("/Sucesso");
+    }
   };
 
   return (
@@ -89,6 +119,20 @@ export default function Main({ fotoDoArticle }: { fotoDoArticle: string | null }
         <button className={styles.salvar} onClick={handleSalvar}>SALVAR</button>
         <Link href="/lista" className={styles.listar}>LISTA</Link>
       </div>
+
+      {/* Exibir coletas recebidas */}
+      {coletas.length > 0 && (
+        <div className={styles.listaColetas}>
+          <h2>Coletas Recentes</h2>
+          <ul>
+            {coletas.map((c, i) => (
+              <li key={i}>
+                <strong>{c.emitente}</strong> — {c.razao} ({c.data?.slice(0, 10)})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }
